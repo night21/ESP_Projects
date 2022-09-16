@@ -6,9 +6,6 @@
 #include <ESP8266mDNS.h>
 #include <EEPROM.h>
 
-// Use software SPI: CS, DI, DO, CLK
-//Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
-// use hardware SPI, just pass in the CS pin
 Adafruit_MAX31865 thermo = Adafruit_MAX31865(2);
 
 // The value of the Rref resistor. Use 430.0 for PT100 and 4300.0 for PT1000
