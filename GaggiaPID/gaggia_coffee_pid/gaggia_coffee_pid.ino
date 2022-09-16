@@ -26,7 +26,9 @@ ESP8266WebServer server(80);
 
 float temperature = 35;
 float actualTemperature = 20;
+float prevTemperature = 20;
 bool isBoiling = false;
+float error = 0;
 
 void handleNotFound() {
   String message = "File Not Found\n\n";
@@ -67,8 +69,8 @@ void setup() {
   EEPROM.begin(4);
   EEPROM.get(0, temperature);
   Serial.println("Temp read from EEPROM: " + String(temperature,2));
-  if (temperature < 20 || temperature > 150) {
-    temperature = 35;
+  if (temperature < 80 || temperature > 150) {
+    temperature = 85;
     EEPROM.put(0, temperature);
     Serial.println("Temperature written to EEPROM");
     EEPROM.get(0, temperature);
@@ -82,9 +84,11 @@ void setup() {
   WiFi.begin(ssid, password);
   Serial.println("");
 
+  int timeout = 0;
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED && timeout < 30) {
     delay(500);
+    timeout = timeout + 1;
     Serial.print(".");
   }
   Serial.println("");
@@ -133,7 +137,11 @@ void loop() {
   Serial.print("Resistance = "); Serial.println(RREF*ratio,8);
   actualTemperature = thermo.temperature(RNOMINAL, RREF);
   Serial.print("Temperature = "); Serial.println(actualTemperature);
-  if (actualTemperature < temperature) { 
+  float error = temperature - actualTemperature;
+  float change = actualTemperature - prevTemperature;
+  boolean increase = change > 0;
+  prevTemperature = actualTemperature;
+  if ((increase && error > 1) || (!increase && error > 0.5)) { 
     digitalWrite(D1, HIGH);
     isBoiling = true;
   }
@@ -141,6 +149,20 @@ void loop() {
     digitalWrite(D1, LOW);
     isBoiling = false;
   }
+
+  if (!increase && !isBoiling && -1 < error < 1)
+  {
+    digitalWrite(D1, HIGH);
+    isBoiling = true;
+    delay(2);
+    digitalWrite(D1, LOW);
+    isBoiling = false;
+  }
+
+
+  int delayInMs = error * error;
+  if (delayInMs < 5) delayInMs = 5;
+  if (delayInMs > 1000) delayInMs = 1000;
 
   // Check and print any faults
   uint8_t fault = thermo.readFault();
@@ -167,7 +189,7 @@ void loop() {
     thermo.clearFault();
   }
   Serial.println();
-  delay(1000);
+  delay(delayInMs);
 
   server.handleClient();
   MDNS.update();
