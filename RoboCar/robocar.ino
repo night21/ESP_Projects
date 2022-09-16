@@ -6,14 +6,14 @@
 
 #define S_ON 1
 #define S_OFF 0
-const char* ssid = "<SSID>"; // SSID
-const char* password = "<Password>";
+const char* ssid = "<SSID>";
+const char* password = "<PASS>";
 
 ESP8266WebServer server(80);
 HCSR04 hc(5,4);//initialisation class HCSR04 (trig pin , echo pin)
 
-IPAddress ip(192, 168, 1, 125);
-IPAddress gateway(192, 168, 1, 1);
+IPAddress ip(192, 168, 99, 125);
+IPAddress gateway(192, 168, 99, 1);
 IPAddress subnet(255, 255, 255, 0);
 
 int a1a = 12;
@@ -96,16 +96,23 @@ void loop()
   if (state == S_ON) {
     float distance = hc.dist();
     if (distance < 40 && distance > 10) {
-      Serial.println(distance);
       int count = 0;
       while (hc.dist() < 40 && count < 10) {
       motorTurnLeft();
+      Serial.println(distance);
+      Serial.println("Turn left");
+      count++;
       delay(100);
       }
+      Serial.println(distance);
+      Serial.println("Stop");
       motorStop();
     } else if (distance < 10)  {
+      Serial.println(distance);
+      Serial.println("Reverse");
       motorReverse();
     }  else  {
+      Serial.println("Forward");
       motorForward();
     }
   }
@@ -134,15 +141,15 @@ void motorReverse() {
 void motorForward() {
       digitalWrite(a1b,HIGH);
       digitalWrite(b1b,HIGH);
-      analogWrite(a1a,2000);
-      analogWrite(b1a,2000);
+      analogWrite(a1a,350);
+      analogWrite(b1a,350);
       motorStatus = "Forward";
 }
 
 void motorTurnLeft() {
       digitalWrite(a1b,HIGH);
       digitalWrite(b1b,LOW);
-      analogWrite(a1a,2000);
+      analogWrite(a1a,500);
       analogWrite(b1a,0);
-      motorStatus = "Forward";
+      motorStatus = "Left Forward";
 }
