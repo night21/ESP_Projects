@@ -11,10 +11,10 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-#define SERVER_IP "192.168.50.109"
+#define SERVER_IP "IP"
 
-#define STASSID "Home"
-#define STAPSK "Mk21rt73Z1237"
+#define STASSID "<SSID>"
+#define STAPSK "<PASS>"
 
 #define A_PIN A0
 #define VOLTAGE 5
@@ -89,7 +89,7 @@ void loop() {
 
     Serial.print("[HTTP] begin...\n");
     // configure traged server and url
-    http.begin(client, "http://" SERVER_IP ":8080");  // HTTP
+    http.begin(client, "http://" SERVER_IP ":<PORT>");  // HTTP
     http.addHeader("Content-Type", "application/json");
 
     Serial.print("[HTTP] POST...\n");
