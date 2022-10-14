@@ -3,3 +3,4 @@ sensorlogger/pyvenv.cfg
 sensorlogger/Lib/*
 sensorlogger/Scripts/*
 sensorlogger/__pycache__/*
+sensorlogger/.vscode/*
