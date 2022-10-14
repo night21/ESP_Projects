@@ -1,15 +1,15 @@
 import mariadb
 import sys
-import json
+from flask import current_app as app
 
 class DbOps:
     def __init__(self):
         # Connect to MariaDB Platform
         try:
             self.conn = mariadb.connect(
-                user="<user>",
-                password="<pass>",
-                host="localhost",
+                user=app.config['DB_USER'],
+                password=app.config['DB_PASS'],
+                host=app.config['DB_HOST'],
                 port=3306,
                 database="data_repository"
 
@@ -20,11 +20,11 @@ class DbOps:
 
     def get_data(self):
         cur = self.conn.cursor()
-        cur.execute("select type,time,value from sensor_data")
+        cur.execute("select type, time, value from sensor_data")
         rows = cur.fetchall()
         r = []
         for row in rows:
-            r.append({'type' : row[0], 'data' : row[1]})
+            r.append({'type' : row[0], 'time' : row[1], 'value' : row[2]})
         #for (Type,Data) in cur:
         #    r = f"{Type} sensor with {Data}"
         cur.close();

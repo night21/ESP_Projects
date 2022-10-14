@@ -8,6 +8,10 @@ from db import DbOps
 from flask_restful import Api,Resource
 
 app = Flask(__name__)
+app.config['SECRET'] = "<Secret>"
+app.config['DB_HOST'] = "<HOST>"
+app.config['DB_USER'] = "<user>"
+app.config['DB_PASS'] = "<pass>"
 api = Api(app)
 
 class Home(Resource):
@@ -19,7 +23,7 @@ class Home(Resource):
         if (header == 'text/html'):
             data = request.data
             print(data)
-            payload = jwt.decode(data, "<secrekey>", ["HS256"])
+            payload = jwt.decode(data, app.config['SECRET'], ["HS256"])
             
 
             d=DbOps()
