@@ -1,1 +1,4 @@
 .vscode/arduino.json
+sensorlogger/pyvenv.cfg
+sensorlogger/Lib/*
+sensorlogger/Scripts/*

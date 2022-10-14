@@ -23,7 +23,10 @@ class Home(Resource):
             
 
             d=DbOps()
-            d.insert_data(payload['Type'], payload['Data'])
+            performedTime = payload['time']
+            d.insert_data('temperature', performedTime, payload['temperature'])
+            d.insert_data('humidity', performedTime, payload['humidity'])
+            d.insert_data('co', performedTime, payload['co'])
             d.close_conn()
         else:
             return 'Content-Type not supported!'

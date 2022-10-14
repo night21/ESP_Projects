@@ -26,7 +26,6 @@ CustomJWT jwt(key, 256);
 #define A_PIN A0
 #define VOLTAGE 5
 
-
 // init MQ7 device
 MQ7 mq7(A_PIN, VOLTAGE);
 
@@ -58,6 +57,7 @@ void loop() {
   // Wait a few seconds between measurements.
   delay(15000);
 
+  
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
   float h = dht.readHumidity();
@@ -87,8 +87,8 @@ void loop() {
   dtostrf(h, 5, 2, ht);
   dtostrf(ppm, 5, 2, pt);
 
-  char rawMessage[70];
-  sprintf(rawMessage, "{\"Type\":\"DHT22\", \"Data\":\"T=%s, H=%s, PPM=%s\"}", tt, ht, pt);
+  char rawMessage[93];
+  sprintf(rawMessage, "{\"time\":\"%s\", \"temperature\":%s, \"humidity\":%s, \"co\":%s}", '2002-01-01 12:59:59', tt, ht, pt);
   
   jwt.allocateJWTMemory();
   jwt.encodeJWT(rawMessage);

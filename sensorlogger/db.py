@@ -20,7 +20,7 @@ class DbOps:
 
     def get_data(self):
         cur = self.conn.cursor()
-        cur.execute("select Type,Data from sensor_data")
+        cur.execute("select type,time,value from sensor_data")
         rows = cur.fetchall()
         r = []
         for row in rows:
@@ -30,10 +30,10 @@ class DbOps:
         cur.close();
         return r
 
-    def insert_data(self, sType, sData):
+    def insert_data(self, type, time, value):
         cur = self.conn.cursor()
-        sql = "INSERT INTO sensor_data (Type, Data) VALUES (%s, %s)"
-        val = (sType, sData)
+        sql = "INSERT INTO sensor_data (type, time, value) VALUES (%s, %s, %s)"
+        val = (type, time, value)
         cur.execute(sql, val)
         self.conn.commit()
 
