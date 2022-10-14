@@ -1,3 +1,7 @@
+#include <NTPClient_Generic.h>
+#include <NTPClient_Generic.hpp>
+#include <WiFiUdp.h>
+
 #include <CustomJWT.h>
 
 #include <MQ7.h>
@@ -29,6 +33,11 @@ CustomJWT jwt(key, 256);
 // init MQ7 device
 MQ7 mq7(A_PIN, VOLTAGE);
 
+// configure NTP
+WiFiUDP ntpUDP;
+
+NTPClient timeClient(ntpUDP);
+
 void setup() {
   
   Serial.begin(9600);
@@ -51,12 +60,15 @@ void setup() {
   Serial.println("");
   Serial.print("Connected! IP address: ");
   Serial.println(WiFi.localIP());  
+
+  timeClient.begin();
+  Serial.println("Using NTP Server " + timeClient.getPoolServerName());
 }
 
 void loop() {
   // Wait a few seconds between measurements.
   delay(15000);
-
+  timeClient.update();
   
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
@@ -88,7 +100,17 @@ void loop() {
   dtostrf(ppm, 5, 2, pt);
 
   char rawMessage[93];
-  sprintf(rawMessage, "{\"time\":\"%s\", \"temperature\":%s, \"humidity\":%s, \"co\":%s}", '2002-01-01 12:59:59', tt, ht, pt);
+  sprintf(rawMessage, "{\"time\":\"%04d-%02d-%02d %02d:%02d:%02d\", \"temperature\":%s, \"humidity\":%s, \"co\":%s}", 
+  timeClient.getYear(),
+  timeClient.getMonth(),
+  timeClient.getDay(), 
+  timeClient.getHours(),
+  timeClient.getMinutes(),
+  timeClient.getSeconds(),
+  tt, ht, pt);
+
+  Serial.print("Message: ");
+  Serial.println(rawMessage);
   
   jwt.allocateJWTMemory();
   jwt.encodeJWT(rawMessage);
