@@ -19,11 +19,12 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 // Wifi configuration
-#define SERVER_IP "<server address>"
-#define STASSID "<wifi ssid>"
-#define STAPSK "<wifi pass>"
+#define SERVER_IP "<IP>"
+#define SERVER_PORT "<PORT>"
+#define STASSID "<SSID>"
+#define STAPSK "<PASS>"
 // Message Encrytion - HMAC 256 with JWT
-char key[] = "<secret key>";
+char key[] = "<SECRET>";
 CustomJWT jwt(key, 256);
 
 // MQ-7 Configuration
@@ -37,6 +38,7 @@ MQ7 mq7(A_PIN, VOLTAGE);
 WiFiUDP ntpUDP;
 
 NTPClient timeClient(ntpUDP);
+int counter = 0;
 
 void setup() {
   
@@ -51,25 +53,41 @@ void setup() {
 
   Serial.println(F("Wifi init!"));
   WiFi.begin(STASSID, STAPSK);
-  int counter = 0;
+  counter = 0;
   while (WiFi.status() != WL_CONNECTED && counter < 30) {
     delay(500);
     Serial.print(".");
     counter++;
   }
+  Serial.println("Check Wifi again");
+  counter = 0;
+  while (WiFi.status() != WL_CONNECTED && counter < 30) {
+    delay(500);
+    Serial.print(".");
+    counter++;
+  }
+  delay(1000);
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
+  counter = 0;
   Serial.println("");
   Serial.print("Connected! IP address: ");
   Serial.println(WiFi.localIP());  
 
+
   timeClient.begin();
   Serial.println("Using NTP Server " + timeClient.getPoolServerName());
-}
 
-void loop() {
-  // Wait a few seconds between measurements.
-  delay(15000);
   timeClient.update();
-  
+  counter = 0;
+  while(timeClient.getYear() == 1970 && counter < 30) 
+  {
+    delay(1000);
+    timeClient.update();
+    Serial.print(".");
+    counter++;
+  }
+  counter = 0;
   // Reading temperature or humidity takes about 250 milliseconds!
   // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
   float h = dht.readHumidity();
@@ -118,6 +136,17 @@ void loop() {
   //Serial.println("Raw Message: ");
   //Serial.println(rawMessage);
   //Serial.println(jwt.out);
+  if ((WiFi.status() != WL_CONNECTED)) {
+    Serial.println("Reconnecting to WIFI network");
+    WiFi.disconnect();
+    WiFi.begin(STASSID, STAPSK);  
+    while (WiFi.status() != WL_CONNECTED && counter < 30) {
+      delay(500);
+      Serial.print(".");
+      counter++;
+    }
+    counter = 0;
+  }
   
   if ((WiFi.status() == WL_CONNECTED)) {
 
@@ -126,7 +155,7 @@ void loop() {
 
     Serial.print("[HTTP] begin...\n");
     // configure traged server and url
-    http.begin(client, "http://" SERVER_IP ":8080");  // HTTP
+    http.begin(client, "http://" SERVER_IP ":" SERVER_PORT);  // HTTP
     http.addHeader("Content-Type", "text/html");
 
 
@@ -151,6 +180,15 @@ void loop() {
     }
 
     http.end();
+  } else {
+    Serial.println(WiFi.status());
   }
   jwt.clear();
+  Serial.println("Going Deep");
+  ESP.deepSleep(300e6);
+  // Wait a few seconds between measurements.
+  //delay(300000);
+  
 }
+
+void loop() { }

@@ -22,7 +22,7 @@ class Home(Resource):
         header = request.headers.get('Content-Type')
         if (header == 'text/html'):
             data = request.data
-            print(data)
+            #print(data)
             payload = jwt.decode(data, app.config['SECRET'], ["HS256"])
             
 
@@ -40,7 +40,6 @@ class SensorData(Resource):
         d = DbOps()
         r = d.get_data()
         d.close_conn();
-        #d = sensorData('test', 'data')
         return jsonify(r)
         
 
@@ -48,4 +47,4 @@ api.add_resource(Home, "/")
 api.add_resource(SensorData, "/sensor")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0",port=8080)
+    app.run()

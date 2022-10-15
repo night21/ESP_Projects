@@ -1,0 +1,12 @@
+[Unit]
+Description=Sensor Logger service to collect sensor data
+After=network.target
+
+[Service]
+User=pi
+Group=www-data
+WorkingDirectory=/home/pi/sensorlogger
+Environment="PATH=/home/pi/sensorlogger/bin"
+ExecStart=/home/pi/sensorlogger/bin/uwsgi --ini sensorlogger.ini
+[Install]
+WantedBy=multi-user.target
