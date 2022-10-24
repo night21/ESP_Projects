@@ -1,8 +1,9 @@
+from datetime import datetime
 from encodings import utf_8
 import jwt
 import json
 from urllib import request
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from data import sensorData
 from db import DbOps
 from flask_restful import Api,Resource
@@ -14,10 +15,20 @@ app.config['DB_USER'] = "<user>"
 app.config['DB_PASS'] = "<pass>"
 api = Api(app)
 
-class Home(Resource):
-    def get(self):
-        return "Hello this is a test application"
+@app.route("/home")
+def index():
+    line_labels=[]
+    line_values=[]
+    d = DbOps()
+    r = d.get_data()
+    d.close_conn();
+    for row in r:
+        if (row['type'] == 'temperature'):
+            line_labels.append(row['time'])
+            line_values.append(row['value'])
+    return render_template('line_chart.html', title='Temperature', min=-20, max=40, labels=line_labels, values=line_values)
 
+class Home(Resource):
     def post(self):
         header = request.headers.get('Content-Type')
         if (header == 'text/html'):

@@ -20,7 +20,7 @@ class DbOps:
 
     def get_data(self):
         cur = self.conn.cursor()
-        cur.execute("select type, time, value from sensor_data")
+        cur.execute("select type, time, value from sensor_data ORDER BY id DESC limit 500")
         rows = cur.fetchall()
         r = []
         for row in rows:
