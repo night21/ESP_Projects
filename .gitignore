@@ -5,3 +5,4 @@ sensorlogger/Scripts/*
 sensorlogger/__pycache__/*
 sensorlogger/.vscode/*
 WS.code-workspace
+sensorlogger/Config/config.py

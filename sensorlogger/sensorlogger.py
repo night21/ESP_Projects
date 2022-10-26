@@ -9,24 +9,33 @@ from db import DbOps
 from flask_restful import Api,Resource
 
 app = Flask(__name__)
-app.config['SECRET'] = "<Secret>"
-app.config['DB_HOST'] = "<HOST>"
-app.config['DB_USER'] = "<user>"
-app.config['DB_PASS'] = "<pass>"
+app.config.from_pyfile('Config/config.py')
 api = Api(app)
 
 @app.route("/home")
 def index():
     line_labels=[]
-    line_values=[]
+    temperature_values=[]
+    humidity_values = []
+    co_values = []
     d = DbOps()
     r = d.get_data()
-    d.close_conn();
+    d.close_conn()
+    skiptill = len(r) // 300
+    count = 1
     for row in r:
         if (row['type'] == 'temperature'):
-            line_labels.append(row['time'])
-            line_values.append(row['value'])
-    return render_template('line_chart.html', title='Temperature', min=-20, max=40, labels=line_labels, values=line_values)
+            count = count + 1
+            if (count % skiptill == 0):
+                line_labels.append(row['time'])
+                temperature_values.append(row['value'])
+        if (row['type'] == 'humidity'):
+            if (count % skiptill == 0):
+                humidity_values.append(row['value'])
+        if (row['type'] == 'co'):
+            if (count % skiptill == 0):
+                co_values.append(row['value'])
+    return render_template('line_chart.html', title='Environmental Data', max=100, labels=line_labels, temperatures=temperature_values, humidities = humidity_values, cos=co_values)
 
 class Home(Resource):
     def post(self):
