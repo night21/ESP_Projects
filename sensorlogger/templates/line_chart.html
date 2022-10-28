@@ -6,9 +6,23 @@
 </head>
 
 <body>
-  <center>
+<center>
     <h1>{{ title }}</h1>
 
+    <div style="height:150px;width:200px;border: 2px solid aquamarine; border-radius:25px;display: inline-block;margin: 25px;padding: 25px;">
+      <h2>Temperature</h2>
+      <h1>{{ curr_temp }} °C</h1>
+    </div>
+    <div style="height:150px;width:200px;border: 2px solid aquamarine; border-radius:25px;display: inline-block;margin: 25px;padding: 25px;">
+      <h2>Humidity</h2>
+      <h1>{{ curr_hum }} %</h1>
+    </div>
+    <div style="height:150px;width:200px;border: 2px solid aquamarine; border-radius:25px;display: inline-block;margin: 25px;padding: 25px;">
+      <h2>CO</h2>
+      <h1>{{ curr_co }} ppm</h1>
+    </div>
+    
+    <h2> Trends</h2>
     <canvas id="chart" width="1800" height="800" ></canvas>
     <script>
       var temperatureData = {
@@ -76,6 +90,6 @@
       });
 
     </script>
-  </center>
+</center>
 </body>
 </html>
