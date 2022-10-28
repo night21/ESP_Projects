@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from encodings import utf_8
 import jwt
 import json
@@ -7,6 +7,9 @@ from flask import Flask, request, jsonify, render_template
 from data import sensorData
 from db import DbOps
 from flask_restful import Api,Resource
+from datetime import datetime
+from datetime import timedelta
+import pytz
 
 app = Flask(__name__)
 app.config.from_pyfile('Config/config.py')
@@ -22,20 +25,34 @@ def index():
     r = d.get_data()
     d.close_conn()
     skiptill = len(r) // 300
+    localTZ = pytz.timezone('Europe/Budapest')
     count = 1
+    local_datetime = datetime.now()
     for row in r:
         if (row['type'] == 'temperature'):
             count = count + 1
             if (count % skiptill == 0):
-                line_labels.append(row['time'])
+                db_datetime = row['time']
+                if (db_datetime.year == 1970):
+                        local_datetime = local_datetime + timedelta(minutes=5)
+                else:
+                        local_datetime = localTZ.localize(db_datetime)    
+                line_labels.append(local_datetime)
                 temperature_values.append(row['value'])
+            curr_temp = row['value']
         if (row['type'] == 'humidity'):
             if (count % skiptill == 0):
                 humidity_values.append(row['value'])
+            curr_hum = row['value']
         if (row['type'] == 'co'):
             if (count % skiptill == 0):
                 co_values.append(row['value'])
-    return render_template('line_chart.html', title='Environmental Data', max=100, labels=line_labels, temperatures=temperature_values, humidities = humidity_values, cos=co_values)
+            curr_co = row['value']
+
+    current_values = {'curr_temp': curr_temp,
+    'curr_hum': curr_hum,
+    'curr_co': curr_co}
+    return render_template('line_chart.html', title='Environmental Data', max=100, labels=line_labels, temperatures=temperature_values, humidities = humidity_values, cos=co_values, **current_values)
 
 class Home(Resource):
     def post(self):
