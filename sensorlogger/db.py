@@ -18,9 +18,12 @@ class DbOps:
             print(f"Error connecting to MariaDB Platform: {e}")
             sys.exit(1)
 
-    def get_data(self):
+    def get_data(self, limit):
         cur = self.conn.cursor()
-        cur.execute("select type, time, value from sensor_data")
+        query = "select type, time, value from sensor_data"
+        if (limit != 0):
+            query = query + " order by id DESC LIMIT " + str(limit)
+        cur.execute(query)
         rows = cur.fetchall()
         r = []
         for row in rows:
@@ -28,6 +31,7 @@ class DbOps:
         #for (Type,Data) in cur:
         #    r = f"{Type} sensor with {Data}"
         cur.close();
+        r.reverse()
         return r
 
     def insert_data(self, type, time, value):

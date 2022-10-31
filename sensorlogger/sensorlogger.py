@@ -22,7 +22,38 @@ def index():
     humidity_values = []
     co_values = []
     d = DbOps()
-    r = d.get_data()
+    r = d.get_data(600)
+    d.close_conn()
+    localTZ = pytz.timezone('Europe/Budapest')
+    local_datetime = datetime.now()
+    for row in r:
+        if (row['type'] == 'temperature'):
+            db_datetime = row['time']
+            if (db_datetime.year == 1970):
+                    local_datetime = local_datetime + timedelta(minutes=5)
+            else:
+                    local_datetime = localTZ.localize(db_datetime)    
+            line_labels.append(local_datetime)
+            temperature_values.append(row['value'])
+        if (row['type'] == 'humidity'):
+            humidity_values.append(row['value'])
+        if (row['type'] == 'co'):
+            co_values.append(row['value'])
+
+    current_values = {'curr_temp': temperature_values[len(temperature_values) - 1],
+    'curr_hum': humidity_values[len(humidity_values) - 1],
+    'curr_co': co_values[len(co_values) - 1]}
+
+    return render_template('line_chart.html', title='Environmental Data', max=100, labels=line_labels, temperatures=temperature_values, humidities = humidity_values, cos=co_values, **current_values)
+
+
+def test(self):
+    line_labels=[]
+    temperature_values=[]
+    humidity_values = []
+    co_values = []
+    d = DbOps()
+    r = d.get_data(0)
     d.close_conn()
     skiptill = len(r) // 300
     localTZ = pytz.timezone('Europe/Budapest')
@@ -53,6 +84,7 @@ def index():
     'curr_hum': curr_hum,
     'curr_co': curr_co}
     return render_template('line_chart.html', title='Environmental Data', max=100, labels=line_labels, temperatures=temperature_values, humidities = humidity_values, cos=co_values, **current_values)
+
 
 class Home(Resource):
     def post(self):
