@@ -104,16 +104,7 @@ class Home(Resource):
         else:
             return 'Content-Type not supported!'
 
-class SensorData(Resource):
-    def get(self):
-        d = DbOps()
-        r = d.get_data()
-        d.close_conn();
-        return jsonify(r)
-        
-
 api.add_resource(Home, "/")
-api.add_resource(SensorData, "/sensor")
 
 if __name__ == "__main__":
     app.run()
